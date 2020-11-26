@@ -3,13 +3,19 @@
     <v-row class="text-center">
       <v-col class="mb-4">
         <h1 class="display-2 font-weight-bold mb-3">
-          対戦管理
+          対戦予約受付
         </h1>
-
-        <p class="subheading font-weight-regular">
-          For help and collaboration with other Vuetify developers,
-        </p>
-        <v-sheet rounded="xl" elevation="7" class="mx-auto">
+        <v-sheet
+          cols="12"
+          sm="12"
+          md="12"
+          lg="12"
+          xl="12"
+          height="150"
+          rounded="xl"
+          elevation="7"
+          class="mx-auto"
+        >
           <v-row class="text-center">
             <v-col class="">
               対戦を希望の方はこちらから予約をお願いします
@@ -44,10 +50,10 @@
       <v-row class="justify-center">
         <v-col
           cols="12"
-          sm="10"
-          md="8"
-          lg="4"
-          xl="3"
+          sm="12"
+          md="12"
+          lg="12"
+          xl="12"
           v-for="(item, index) in items"
           :key="item.id"
         >
@@ -59,7 +65,7 @@
               <v-col>
                 <strong>{{ item.name }}</strong>
                 <div class="caption">
-                  {{ item.name }}
+                  {{ item.switchName }}:{{ item.numberOfTimes }}回め
                 </div>
               </v-col>
             </v-row>
@@ -87,11 +93,11 @@ export default {
         animation: 200,
       },
       items: [
-        { id: 1, name: "name01" },
-        { id: 2, name: "name02" },
-        { id: 3, name: "name03" },
-        { id: 4, name: "name04" },
-        { id: 5, name: "name05" },
+        { numberOfTimes: 1, name: "ゆりまる", switchName: "黒月まる" },
+        { numberOfTimes: 1, name: "oz_sho", switchName: "おずしょー" },
+        { numberOfTimes: 1, name: "おだやかじんせい", switchName: "おだやか" },
+        { numberOfTimes: 2, name: "きるりん", switchName: "きる" },
+        { numberOfTimes: 1, name: "ともちん", switchName: "ともちん_GOD" },
       ],
     };
   },

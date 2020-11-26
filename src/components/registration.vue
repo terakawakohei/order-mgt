@@ -22,7 +22,16 @@
       <v-stepper-content step="1">
         <v-row class="text-center">
           <v-col class="">
-            本日何回目の対戦予約かを入力してください
+            <strong>
+              本日何回目の対戦予約かを入力してください
+            </strong>
+          </v-col>
+        </v-row>
+        <v-row class="text-center">
+          <v-col class="">
+            <span class="text-caption">
+              2回目以降は、初めて参加される方が優先されます
+            </span>
           </v-col>
         </v-row>
         <v-row justify="center" class="my-5">
@@ -38,7 +47,13 @@
           </v-col>
         </v-row>
         <v-row justify="center">
-          <v-btn rounded large color="primary" @click="e1 = 2">
+          <v-btn
+            rounded
+            large
+            color="primary"
+            :disabled="!inputData.numberOfTimes"
+            @click="e1 = 2"
+          >
             次へすすむ
             <v-icon class="ml-2" dark>
               mdi-arrow-right-bold
@@ -47,7 +62,7 @@
         </v-row>
 
         <v-row justify="end">
-          <v-btn outlined text @click="close()">
+          <v-btn outlined text class="mr-3" @click="close()">
             予約をやめる
           </v-btn>
         </v-row>
@@ -55,8 +70,24 @@
 
       <v-stepper-content step="2">
         <v-row class="text-center">
-          <v-col class="">
-            youtubeアカウントの名前と使用するスイッチの名前（専用部屋に表示される名前）を入力してください
+          <v-col>
+            <strong>・youtubeアカウントの名前</strong>
+            <span class="text-caption">
+              (コメント欄で表示される自分の名前)
+            </span>
+          </v-col>
+        </v-row>
+        <v-row class="text-center">
+          <v-col>
+            <strong>・使用するスイッチの名前</strong>
+            <span class="text-caption">
+              (専用部屋に入った時に表示される自分の名前)
+            </span>
+          </v-col>
+        </v-row>
+        <v-row class="text-center">
+          <v-col>
+            を入力してください。
           </v-col>
         </v-row>
         <v-row justify="center" class="my-5">
@@ -69,7 +100,7 @@
           <v-col cols="12" sm="10" md="8" lg="4" xl="3" class="mb-4">
             <v-text-field
               v-model="inputData.switchName"
-              label="Another input"
+              label="使用するスイッチの名前（専用部屋に入った時に表示される自分の名前）"
             ></v-text-field>
           </v-col>
         </v-row>
@@ -80,6 +111,7 @@
             class="white--text"
             large
             color="orange"
+            :disabled="!inputData.name"
             @click="e1 = 3"
           >
             予約する
@@ -89,7 +121,7 @@
           </v-btn>
         </v-row>
         <v-row justify="end">
-          <v-btn outlined text @click="e1 = 1">
+          <v-btn outlined text class="mr-3" @click="e1 = 1">
             戻る
           </v-btn>
         </v-row>
@@ -97,23 +129,22 @@
       <v-stepper-content step="3">
         <v-row class="text-center">
           <v-col class="">
-            予約完了
+            <strong>予約完了</strong>
           </v-col>
         </v-row>
-        <v-row class="pt-1">
-          <v-col cols="3">
-            <strong>4番目</strong>
-          </v-col>
+        <v-row class="text-center">
           <v-col>
-            <strong>{{ inputData.name }}</strong>
-            <div class="caption">
-              {{ inputData.switchName }}
-            </div>
+            あなたは{{}}ばんめに予約されました。
+          </v-col>
+        </v-row>
+        <v-row class="text-center">
+          <v-col>
+            およそ{{}}分後に順番が回ってきます。それまでお待ちください！
           </v-col>
         </v-row>
 
         <v-row justify="end">
-          <v-btn outlined text @click="book()">
+          <v-btn outlined text class="mr-3" @click="book()">
             閉じる
           </v-btn>
         </v-row>
@@ -128,7 +159,7 @@ export default {
 
   data: () => ({
     inputData: {
-      numberOfTimes: Number,
+      numberOfTimes: null,
       name: "",
       swichName: "",
     },
