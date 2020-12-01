@@ -25,6 +25,9 @@
             <v-btn color="success" @click.stop="dialog = true">
               開く
             </v-btn>
+            <v-btn @click="getParticipant()">
+              テスト
+            </v-btn>
             <v-dialog v-model="dialog">
               <Registration v-on:clickClose="close" />
             </v-dialog>
@@ -33,20 +36,6 @@
       </v-col>
     </v-row>
     <v-timeline align-top dense>
-      <v-timeline-item class="">
-        <v-row class="pt-1">
-          <v-col cols="3">
-            <strong>1st</strong>
-          </v-col>
-          <v-col>
-            <strong>おだやかじんせい</strong>
-            <div class="caption">
-              おだやか
-            </div>
-          </v-col>
-        </v-row>
-      </v-timeline-item>
-
       <v-row class="justify-center">
         <v-col
           cols="12"
@@ -54,8 +43,8 @@
           md="12"
           lg="12"
           xl="12"
-          v-for="(item, index) in items"
-          :key="item.id"
+          v-for="(p, index) in participants"
+          :key="p.index"
         >
           <v-timeline-item small class="">
             <v-row class="pt-1">
@@ -63,9 +52,9 @@
                 <strong>{{ index + 1 }}st</strong>
               </v-col>
               <v-col>
-                <strong>{{ item.name }}</strong>
+                <strong>{{ p.Name }}</strong>
                 <div class="caption">
-                  {{ item.switchName }}:{{ item.numberOfTimes }}回め
+                  {{ p.SwitchName }}:{{ p.NumberOfTimes }}回目
                 </div>
               </v-col>
             </v-row>
@@ -99,11 +88,36 @@ export default {
         { numberOfTimes: 2, name: "きるりん", switchName: "きる" },
         { numberOfTimes: 1, name: "ともちん", switchName: "ともちん_GOD" },
       ],
+      participants: [],
     };
   },
   methods: {
     close() {
       this.dialog = false;
+      this.getParticipant();
+    },
+    getParticipant() {
+      this.participants = [];
+      this.axios
+        .get(`https://rokko-festival-server.herokuapp.com/book/all`)
+        .then((response) => {
+          // console.log(Object.entries(response.data)[0][1]);
+          // console.log(typeof this.participants);
+          Object.entries(response.data).forEach((elem) => {
+            this.participants.push(elem[1]);
+          });
+          function compare(a, b) {
+            let comparison = 0;
+            if (a.Order > b.Order) {
+              comparison = 1;
+            } else if (a.Order < b.Order) {
+              comparison = -1;
+            }
+            return comparison;
+          }
+
+          this.participants.sort(compare);
+        });
     },
   },
 };

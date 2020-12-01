@@ -31,13 +31,14 @@
           <v-col class="">
             <span class="text-caption">
               2回目以降は、初めて参加される方が優先されます
+              {{ numberOfTimes }}
             </span>
           </v-col>
         </v-row>
         <v-row justify="center" class="my-5">
           <v-col cols="12" sm="10" md="8" lg="4" xl="3" class="mb-4">
             <v-select
-              v-model="inputData.numberOfTimes"
+              v-model="numberOfTimes"
               :items="items"
               item-text="string"
               item-value="number"
@@ -51,7 +52,7 @@
             rounded
             large
             color="primary"
-            :disabled="!inputData.numberOfTimes"
+            :disabled="!numberOfTimes"
             @click="e1 = 2"
           >
             次へすすむ
@@ -94,12 +95,12 @@
           <v-col cols="12" sm="10" md="8" lg="4" xl="3" class="mb-4">
             <v-text-field
               label="youtubeアカウントの名前（コメント欄に表示される名前）"
-              v-model="inputData.name"
+              v-model="name"
             ></v-text-field>
           </v-col>
           <v-col cols="12" sm="10" md="8" lg="4" xl="3" class="mb-4">
             <v-text-field
-              v-model="inputData.switchName"
+              v-model="switchName"
               label="使用するスイッチの名前（専用部屋に入った時に表示される自分の名前）"
             ></v-text-field>
           </v-col>
@@ -111,8 +112,8 @@
             class="white--text"
             large
             color="orange"
-            :disabled="!inputData.name"
-            @click="e1 = 3"
+            :disabled="!name || !switchName"
+            @click="book()"
           >
             予約する
             <v-icon class="ml-2">
@@ -133,18 +134,18 @@
           </v-col>
         </v-row>
         <v-row class="text-center">
-          <v-col>
-            あなたは{{}}ばんめに予約されました。
-          </v-col>
+          <v-col> あなたは{{ order }}ばんめに予約されました。 </v-col>
         </v-row>
         <v-row class="text-center">
           <v-col>
-            およそ{{}}分後に順番が回ってきます。それまでお待ちください！
+            およそ{{
+              order * 3
+            }}分後に順番が回ってきます。それまでお待ちください！
           </v-col>
         </v-row>
 
         <v-row justify="end">
-          <v-btn outlined text class="mr-3" @click="book()">
+          <v-btn outlined text class="mr-3" @click="finishBook()">
             閉じる
           </v-btn>
         </v-row>
@@ -158,11 +159,12 @@ export default {
   name: "Registration",
 
   data: () => ({
-    inputData: {
-      numberOfTimes: null,
-      name: "",
-      swichName: "",
-    },
+    order: null,
+    numberOfTimes: null,
+    name: "",
+    switchName: "",
+    counts: null,
+
     e1: 1,
     select: { string: "1回目", number: 1 },
     items: [
@@ -178,10 +180,45 @@ export default {
     close() {
       this.$emit("clickClose", this.returnData);
     },
-    book() {
+    finishBook() {
       this.e1 = 1;
       this.close();
-      console.log(this.e1);
+    },
+    book() {
+      this.e1 = 3;
+      // console.log(this.numberOfTimes);
+      // console.log(this.name);
+      // console.log(this.switchName);
+
+      this.axios
+        .get(`https://rokko-festival-server.herokuapp.com/book/count`)
+        .then((response) => {
+          // let counts;
+
+          // counts = 1 + response.data;
+          // console.log("方は");
+
+          // console.log(counts);
+
+          this.order = null;
+
+          this.order = 1 + response.data;
+          console.log(this.order);
+
+          this.axios
+            .post(
+              `https://rokko-festival-server.herokuapp.com/book/${this.order}/${this.numberOfTimes}/${this.name}/${this.switchName}`
+            )
+            .then(() => {
+              this.numberOfTimes = null;
+              this.name = "";
+              this.switchName = "";
+            });
+        });
+
+      // this.axios.post(
+      //   `https://rokko-festival-server.herokuapp.com/book/${counts}/${this.numberOfTimes}/${this.name}/${this.switchName}`
+      // );
     },
   },
 };
