@@ -111,12 +111,6 @@ export default {
         );
       });
     },
-    delete(person) {
-      this.axios.put(
-        `https://rokko-festival-server.herokuapp.com/book/${elem.Name}/${index +
-          1}`
-      );
-    },
   },
 };
 </script>
