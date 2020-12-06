@@ -139,6 +139,8 @@
           </v-card>
         </v-dialog>
       </v-col>
+
+      <router-link to="/management">管理画面へ</router-link>
     </v-row>
   </div>
 </template>

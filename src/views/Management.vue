@@ -3,19 +3,19 @@
     <v-row class="text-center">
       <v-col class="mb-4">
         <h1 class="display-2 font-weight-bold mb-3">
-          対戦管理画面
+          管理画面
         </h1>
-        <v-btn @click="getParticipant()">
-          テスト
-        </v-btn>
+
         <p class="subheading font-weight-regular">
-          このページから順番の変更などを行えます
+          このページから順番の変更などを行えます(ドラッグで順番を入れ替えられます)
         </p>
-        <p>{{ doneParticipants }}</p>
-        <p>{{ participants }}</p>
       </v-col>
     </v-row>
-
+    <v-row justify="center">
+      <v-btn color="orange" class="white--text" @click="changeOrder()"
+        >変更を反映する</v-btn
+      >
+    </v-row>
     <draggable
       :options="options"
       v-model="participants"
@@ -103,10 +103,11 @@ export default {
         .get(`https://rokko-festival-server.herokuapp.com/book/all`)
         .then((response) => {
           Object.entries(response.data).forEach((elem) => {
+            this.participants.push(elem[1]);
             //対戦済みでない人を取得
-            if (elem[1].Done == 0) {
-              this.participants.push(elem[1]);
-            }
+            // if (elem[1].Done == 0) {
+            //   this.participants.push(elem[1]);
+            // }
           });
           function compare(a, b) {
             let comparison = 0;
@@ -143,6 +144,8 @@ export default {
           }/${index + 1}`
         );
       });
+
+      this.getParticipant();
     },
     changeDone(name, num) {
       this.axios.put(
