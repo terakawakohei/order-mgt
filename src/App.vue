@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app :style="{ background: $vuetify.theme.themes.light.background }">
     <!-- <v-app-bar
       app
       color="primary"
@@ -36,10 +36,18 @@
         <v-icon>mdi-open-in-new</v-icon>
       </v-btn>
     </v-app-bar> -->
-
-    <v-main>
-      <router-view />
-    </v-main>
+    <v-row
+      :color="$vuetify.theme.themes.light.secondary"
+      style="height: auto;"
+      justify="center"
+      align-content="center"
+    >
+      <v-col>
+        <v-main>
+          <router-view />
+        </v-main>
+      </v-col>
+    </v-row>
   </v-app>
 </template>
 

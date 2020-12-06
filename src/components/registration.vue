@@ -1,19 +1,19 @@
 <template>
   <v-stepper v-model="e1">
     <v-stepper-header>
-      <v-stepper-step :complete="e1 > 1" step="1">
+      <v-stepper-step :complete="e1 > 1" step="1" color="indigo lighten-3">
         参加回数
       </v-stepper-step>
 
       <v-divider></v-divider>
 
-      <v-stepper-step :complete="e1 > 2" step="2">
+      <v-stepper-step :complete="e1 > 2" step="2" color="indigo lighten-3">
         名前入力
       </v-stepper-step>
 
       <v-divider></v-divider>
 
-      <v-stepper-step step="3">
+      <v-stepper-step step="3" color="indigo lighten-3">
         予約完了
       </v-stepper-step>
     </v-stepper-header>
@@ -51,9 +51,10 @@
           <v-btn
             rounded
             large
-            color="primary"
+            color="indigo lighten-3"
             :disabled="!numberOfTimes"
             @click="e1 = 2"
+            class="white--text"
           >
             次へすすむ
             <v-icon class="ml-2" dark>
@@ -62,7 +63,7 @@
           </v-btn>
         </v-row>
 
-        <v-row justify="end">
+        <v-row justify="end" class="py-7">
           <v-btn outlined text class="mr-3" @click="close()">
             予約をやめる
           </v-btn>
@@ -122,7 +123,7 @@
           </v-btn>
         </v-row>
         <v-row justify="end">
-          <v-btn outlined text class="mr-3" @click="e1 = 1">
+          <v-btn outlined text class="mr-3 py-7" @click="e1 = 1">
             戻る
           </v-btn>
         </v-row>
@@ -134,13 +135,15 @@
           </v-col>
         </v-row>
         <v-row class="text-center">
-          <v-col> あなたは{{ order }}ばんめに予約されました。 </v-col>
+          <v-col>
+            あなたは<span class="font-weight-bold">{{ order }}</span
+            >ばんめに予約されました。
+          </v-col>
         </v-row>
         <v-row class="text-center">
           <v-col>
-            およそ{{
-              order * 3
-            }}分後に順番が回ってきます。それまでお待ちください！
+            およそ<span class="font-weight-bold">{{ order * 3 }}</span
+            >分後に順番が回ってきます。それまでお待ちください！
           </v-col>
         </v-row>
 
@@ -185,7 +188,6 @@ export default {
       this.close();
     },
     book() {
-      this.e1 = 3;
       // console.log(this.numberOfTimes);
       // console.log(this.name);
       // console.log(this.switchName);
@@ -200,6 +202,7 @@ export default {
 
           // console.log(counts);
 
+          //DBにある順番待ちの人の数を取得し、最後尾が何番目か決める
           this.order = null;
 
           this.order = 1 + response.data;
@@ -210,6 +213,7 @@ export default {
               `https://rokko-festival-server.herokuapp.com/book/${this.order}/${this.numberOfTimes}/${this.name}/${this.switchName}`
             )
             .then(() => {
+              this.e1 = 3;
               this.numberOfTimes = null;
               this.name = "";
               this.switchName = "";
