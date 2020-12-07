@@ -16,6 +16,7 @@
         >変更を反映する</v-btn
       >
     </v-row>
+
     <draggable
       :options="options"
       v-model="participants"
@@ -36,7 +37,7 @@
               <li v-else class="feed-list">終了済み</li>
             </ul>
           </v-card-text>
-          <v-card-actions>
+          <!-- <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn
               v-if="p.Done == 0"
@@ -52,13 +53,12 @@
               v-else
               @click="changeDone(p.Name, 0)"
               color="red"
-              outlined
               rounded
               text
             >
               待ち状態にさせる
             </v-btn>
-          </v-card-actions>
+          </v-card-actions> -->
         </v-card>
       </v-col>
     </draggable>
@@ -103,11 +103,10 @@ export default {
         .get(`https://rokko-festival-server.herokuapp.com/book/all`)
         .then((response) => {
           Object.entries(response.data).forEach((elem) => {
-            this.participants.push(elem[1]);
             //対戦済みでない人を取得
-            // if (elem[1].Done == 0) {
-            //   this.participants.push(elem[1]);
-            // }
+            if (elem[1].Done == 0) {
+              this.participants.push(elem[1]);
+            }
           });
           function compare(a, b) {
             let comparison = 0;
@@ -152,6 +151,8 @@ export default {
         `https://rokko-festival-server.herokuapp.com/book/done/${name}/${num}`
       );
       this.getParticipant();
+      this.changeOrder();
+      console.log(this.participants);
     },
   },
 };

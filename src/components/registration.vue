@@ -181,13 +181,18 @@ export default {
   props: {},
   methods: {
     close() {
-      this.$emit("clickClose", this.returnData);
+      //親コンポーネント（Home.vue）にダイアログを閉じるような処理をお願いする
+      this.$emit("clickClose");
     },
+
     finishBook() {
+      //ステッパーを最初の画面に戻して、予約画面を閉じる.
       this.e1 = 1;
       this.close();
     },
+
     book() {
+      //データをDBにpostし、予約完了する
       // console.log(this.numberOfTimes);
       // console.log(this.name);
       // console.log(this.switchName);
@@ -195,24 +200,18 @@ export default {
       this.axios
         .get(`https://rokko-festival-server.herokuapp.com/book/count`)
         .then((response) => {
-          // let counts;
-
-          // counts = 1 + response.data;
-          // console.log("方は");
-
-          // console.log(counts);
-
           //DBにある順番待ちの人の数を取得し、最後尾が何番目か決める
           this.order = null;
 
           this.order = 1 + response.data;
-          console.log(this.order);
+          // console.log(this.order);
 
           this.axios
             .post(
               `https://rokko-festival-server.herokuapp.com/book/${this.order}/${this.numberOfTimes}/${this.name}/${this.switchName}`
             )
             .then(() => {
+              //post処理が終わったら画面を進めて、変数を空にする
               this.e1 = 3;
               this.numberOfTimes = null;
               this.name = "";

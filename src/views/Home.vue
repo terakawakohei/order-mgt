@@ -139,8 +139,11 @@
           </v-card>
         </v-dialog>
       </v-col>
-
-      <router-link to="/management">管理画面へ</router-link>
+    </v-row>
+    <v-row justify="center">
+      <v-col>
+        <router-link to="/management">管理画面へ</router-link>
+      </v-col>
     </v-row>
   </div>
 </template>
@@ -162,17 +165,11 @@ export default {
       options: {
         animation: 200,
       },
-      items: [
-        { numberOfTimes: 1, name: "ゆりまる", switchName: "黒月まる" },
-        { numberOfTimes: 1, name: "oz_sho", switchName: "おずしょー" },
-        { numberOfTimes: 1, name: "おだやかじんせい", switchName: "おだやか" },
-        { numberOfTimes: 2, name: "きるりん", switchName: "きる" },
-        { numberOfTimes: 1, name: "ともちん", switchName: "ともちん_GOD" },
-      ],
       participants: [],
     };
   },
   created() {
+    //ページが読み込まれた際に、データを取得
     this.getParticipant();
   },
   methods: {
@@ -185,8 +182,6 @@ export default {
       this.axios
         .get(`https://rokko-festival-server.herokuapp.com/book/all`)
         .then((response) => {
-          // console.log(Object.entries(response.data)[0][1]);
-          // console.log(typeof this.participants);
           Object.entries(response.data).forEach((elem) => {
             //対戦済みでない人を取得
             if (elem[1].Done == 0) {
@@ -195,6 +190,7 @@ export default {
             }
           });
           function compare(a, b) {
+            //DBから取得したデータをOrder(順番)でソート
             let comparison = 0;
             if (a.Order > b.Order) {
               comparison = 1;
