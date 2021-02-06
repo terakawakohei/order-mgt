@@ -11,11 +11,26 @@
         </p>
       </v-col>
     </v-row>
-    <v-btn color="orange" class="white--text" @click="rails()"
-      >CORS動くか</v-btn
-    >
-    <v-row justify="center">
-      <v-btn color="orange" class="white--text" @click="changeOrder()"
+    <v-row class="text-center">
+      <v-col class="">
+        <strong>
+          以下から企画名を選択してください
+        </strong>
+      </v-col>
+    </v-row>
+    <v-row justify="center" class="my-5">
+      <v-col cols="12" sm="10" md="8" lg="4" xl="3" class="mb-4">
+        <v-select
+          v-model="selected_plan"
+          item-text="name"
+          :items="plans"
+          return-object
+        />
+      </v-col>
+    </v-row>
+
+    <v-row justify="center" class="my-5">
+      <v-btn color="orange" class="white--text" @click="update()"
         >変更を反映する</v-btn
       >
     </v-row>
@@ -29,37 +44,24 @@
       <v-col v-for="(p, index) in participants" v-bind:key="index">
         <v-card style="overflow:scroll;">
           <v-card-title>
-            {{ p.Name }}
+            {{ p.name }}
           </v-card-title>
           <v-card-text class="feed-body">
             <ul class="feed-items">
-              <li class="feed-list">{{ p.Order }}ばんめ</li>
-            </ul>
-            <ul class="feed-items">
-              <li v-if="p.Done == 0" class="feed-list">待ち状態</li>
-              <li v-else class="feed-list">終了済み</li>
+              <li class="feed-list">{{ p.order }}ばんめ</li>
             </ul>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn
-              v-if="p.Done == 0"
-              @click="changeDone(p.Name, 1)"
+              v-if="index == 0"
+              @click="finishGame(p.id)"
               color="red"
               outlined
               rounded
               text
             >
               終了済みにする
-            </v-btn>
-            <v-btn
-              v-else
-              @click="changeDone(p.Name, 0)"
-              color="red"
-              rounded
-              text
-            >
-              待ち状態にさせる
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -85,84 +87,87 @@ export default {
         animation: 200,
       },
       participants: [],
+      plans: [],
       doneParticipants: [],
-      items: [
-        { id: 9, name: "name01" },
-        { id: 2, name: "name02" },
-        { id: 3, name: "name03" },
-        { id: 4, name: "name04" },
-        { id: 1, name: "name05" },
-      ],
+      selected_plan: null,
+      url: "https://order-mgt-api.herokuapp.com",
+      // url: "http://localhost:3000",
     };
   },
   created() {
-    this.getParticipant();
-    this.getDoneParticipant();
+    this.getPlans();
+  },
+  watch: {
+    selected_plan: function() {
+      this.getParticipant();
+    },
   },
   methods: {
-    getParticipant() {
-      this.participants = [];
-      this.axios
-        .get(`https://rokko-festival-server.herokuapp.com/book/all`)
-        .then((response) => {
-          Object.entries(response.data).forEach((elem) => {
-            //対戦済みでない人を取得
-            if (elem[1].Done == 0) {
-              this.participants.push(elem[1]);
-            }
-          });
-          function compare(a, b) {
-            let comparison = 0;
-            if (a.Order > b.Order) {
-              comparison = 1;
-            } else if (a.Order < b.Order) {
-              comparison = -1;
-            }
-            return comparison;
-          }
-
-          this.participants.sort(compare);
-        });
-    },
-    getDoneParticipant() {
-      this.doneParticipants = [];
-      this.axios
-        .get(`https://rokko-festival-server.herokuapp.com/book/all`)
-        .then((response) => {
-          Object.entries(response.data).forEach((elem) => {
-            //対戦済みの人を取得
-            if (elem[1].Done == 1) {
-              this.doneParticipants.push(elem[1]);
-              console.log(elem[1]);
-            }
-          });
-        });
-    },
-    changeOrder() {
-      this.participants.forEach((elem, index) => {
-        this.axios.put(
-          `https://rokko-festival-server.herokuapp.com/book/${
-            elem.Name
-          }/${index + 1}`
-        );
+    getPlans() {
+      this.plans = [];
+      this.axios.get(`${this.url}/plans`).then((response) => {
+        this.plans = response.data;
       });
+    },
+    getParticipant() {
+      //selected_planのidと一致、かつ順番待ち状態（deleted_atがnull）のticketを全取得
+      this.participants = [];
+      this.axios.get(`${this.url}/tickets`).then((response) => {
+        for (let t of response.data) {
+          if (t.plan_id == this.selected_plan.id && t.deleted_at == null) {
+            this.participants.push(t);
+          }
+        }
+        function compare(a, b) {
+          let comparison = 0;
+          if (a.order > b.order) {
+            comparison = 1;
+          } else if (a.order < b.order) {
+            comparison = -1;
+          }
+          return comparison;
+        }
 
+        this.participants.sort(compare);
+      });
+    },
+    //participantsの中での並び順でDBに更新をかける
+    changeOrder() {
+      return new Promise((resolve) => {
+        for (let i = 0; i < this.participants.length; i++) {
+          this.axios
+            .put(`${this.url}/tickets/${this.participants[i].id}`, {
+              order: i + 1,
+            })
+            .then(() => {
+              if (i == this.participants.length - 1) {
+                resolve();
+              }
+            });
+        }
+      });
+    },
+    async update() {
+      await this.changeOrder();
       this.getParticipant();
     },
-    changeDone(name, num) {
-      this.axios.put(
-        `https://rokko-festival-server.herokuapp.com/book/done/${name}/${num}`
-      );
-      this.getParticipant();
-      this.changeOrder();
-      console.log(this.participants);
-    },
-    rails() {
+    switchCompleted(id) {
+      console.log(id);
+      console.log(new Date().toISOString());
       this.axios
-        .get(`https://order-mgt.herokuapp.com/management/users`)
-        .then((response) => {
-          console.log(response);
+        .put(`${this.url}/tickets/${id}`, {
+          deleted_at: new Date().toISOString(),
+        })
+        .then(() => {
+          this.getParticipant();
+          console.log(this.participants);
         });
+    },
+    finishGame(id) {
+      this.axios.delete(`${this.url}/tickets/${id}`).then(() => {
+        this.getParticipant();
+        console.log(this.participants);
+      });
     },
   },
 };

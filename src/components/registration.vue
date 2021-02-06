@@ -28,7 +28,7 @@
         <v-row class="text-center">
           <v-col class="">
             <strong>
-              以下の企画への参加申請を行います >
+              以下の企画への参加申請を行います
             </strong>
           </v-col>
         </v-row>
@@ -50,7 +50,7 @@
             :disabled="!selected_plan"
             @click="
               e1 = 2;
-              getParticipant();
+              getParticipated();
             "
             class="white--text"
           >
@@ -76,7 +76,12 @@
         </v-row>
         <v-row class="text-center">
           <v-col>
-            <v-btn outlined text class="mr-3" @click="isFirstTime(true)"
+            <v-btn
+              :disabled="firstTime"
+              outlined
+              text
+              class="mr-3"
+              @click="isFirstTime(true)"
               >1回目</v-btn
             >
           </v-col>
@@ -136,7 +141,7 @@
               <v-select
                 v-model="selected_ticket"
                 item-text="name"
-                :items="participants"
+                :items="participated"
                 return-object
               />
             </v-col>
@@ -201,16 +206,14 @@
         </v-row>
         <v-row class="text-center">
           <v-col>
-            あなたは<span class="font-weight-bold">{{
-              this.participants.length + 1
-            }}</span
+            あなたは<span class="font-weight-bold">{{ this.queueNum + 1 }}</span
             >ばんめに予約されました。
           </v-col>
         </v-row>
         <v-row class="text-center">
           <v-col>
             およそ<span class="font-weight-bold">{{
-              (this.participants.length + 1) * 3
+              (this.queueNum + 1) * 3
             }}</span
             >分後に順番が回ってきます。それまでお待ちください！
           </v-col>
@@ -233,14 +236,16 @@ export default {
   data: () => ({
     name: "",
     switchName: "",
+    queueNum: Number,
     comment: "",
 
     plans: [],
-    participants: [],
+    participated: [],
     selected_plan: null,
     selected_ticket: null,
     firstTime: null,
-    url: "http://localhost:3000",
+    url: "https://order-mgt-api.herokuapp.com",
+    // url: "http://localhost:3000",
 
     e1: 1,
   }),
@@ -259,17 +264,19 @@ export default {
         this.plans = response.data;
       });
     },
-    getParticipant() {
-      //selected_planのidと一致するplan_idを持つticketを全取得
-      this.participants = [];
+    getParticipated() {
+      //selected_planのidと一致、かつ削除ずみ（すでに参加して試合が終わっている）のticketを全取得
+      this.participated = [];
       this.axios.get(`${this.url}/tickets`).then((response) => {
         for (let t of response.data) {
-          if (t.plan_id == this.selected_plan.id) {
-            this.participants.push(t);
+          if (t.plan_id == this.selected_plan.id && t.deleted_at != null) {
+            this.participated.push(t);
           }
         }
-        console.log(this.participants);
-        console.log(this.plans);
+        //待ち行列の数は、企画参加者全員から試合終了済みの数を引く
+        this.queueNum = response.data.length - this.participated.length;
+        console.log("取得dきてるか？");
+        console.log(this.participated);
       });
     },
     isFirstTime(bool) {
@@ -288,8 +295,7 @@ export default {
       this.selected_plan = null;
       this.comment = "";
 
-      this.participants = [];
-      this.plans = [];
+      this.participated = [];
       this.close();
     },
 
@@ -298,16 +304,28 @@ export default {
 
       if (this.selected_ticket) {
         //2回目の申請なら
-
+        //論理削除から復帰させる
         this.axios
-          .put(`${this.url}/tickets/${this.selected_ticket.id}`, {
-            number_of_times: this.selected_ticket.number_of_times + 1,
-            order: this.participants.length + 1,
-            comment: this.comment,
-          })
+          .patch(
+            `${this.url}/tickets/${this.selected_ticket.id}/ticket_restore`
+          )
           .then(() => {
-            //post処理が終わったら画面を進める
-            this.e1 = 4;
+            const ticket = {
+              plan_id: this.selected_plan.id,
+              name: this.selected_ticket.name,
+              switch_name: this.selected_ticket.switch_name,
+              number_of_times: this.selected_ticket.number_of_times + 1,
+              order: this.queueNum + 1,
+              comment: this.comment,
+              deleted_at: null,
+            };
+
+            this.axios
+              .put(`${this.url}/tickets/${this.selected_ticket.id}`, ticket)
+              .then(() => {
+                //post処理が終わったら画面を進める
+                this.e1 = 4;
+              });
           });
       } else {
         const ticket = {
@@ -315,8 +333,9 @@ export default {
           name: this.name,
           switch_name: this.switchName,
           number_of_times: 1,
-          order: this.participants.length + 1,
+          order: this.queueNum + 1,
           comment: this.comment,
+          deleted_at: null,
         };
         console.log(ticket);
         this.axios.post(`${this.url}/tickets`, ticket).then(() => {
