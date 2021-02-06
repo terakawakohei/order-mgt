@@ -11,6 +11,9 @@
         </p>
       </v-col>
     </v-row>
+    <v-btn color="orange" class="white--text" @click="rails()"
+      >CORS動くか</v-btn
+    >
     <v-row justify="center">
       <v-btn color="orange" class="white--text" @click="changeOrder()"
         >変更を反映する</v-btn
@@ -37,7 +40,7 @@
               <li v-else class="feed-list">終了済み</li>
             </ul>
           </v-card-text>
-          <!-- <v-card-actions>
+          <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn
               v-if="p.Done == 0"
@@ -58,7 +61,7 @@
             >
               待ち状態にさせる
             </v-btn>
-          </v-card-actions> -->
+          </v-card-actions>
         </v-card>
       </v-col>
     </draggable>
@@ -153,6 +156,13 @@ export default {
       this.getParticipant();
       this.changeOrder();
       console.log(this.participants);
+    },
+    rails() {
+      this.axios
+        .get(`https://order-mgt.herokuapp.com/management/users`)
+        .then((response) => {
+          console.log(response);
+        });
     },
   },
 };

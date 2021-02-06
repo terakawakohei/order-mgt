@@ -177,32 +177,6 @@ export default {
       this.registDialog = false;
       this.getParticipant();
     },
-    getParticipant() {
-      this.participants = [];
-      this.axios
-        .get(`https://rokko-festival-server.herokuapp.com/book/all`)
-        .then((response) => {
-          Object.entries(response.data).forEach((elem) => {
-            //対戦済みでない人を取得
-            if (elem[1].Done == 0) {
-              this.participants.push(elem[1]);
-              console.log(elem[1]);
-            }
-          });
-          function compare(a, b) {
-            //DBから取得したデータをOrder(順番)でソート
-            let comparison = 0;
-            if (a.Order > b.Order) {
-              comparison = 1;
-            } else if (a.Order < b.Order) {
-              comparison = -1;
-            }
-            return comparison;
-          }
-
-          this.participants.sort(compare);
-        });
-    },
   },
 };
 </script>
