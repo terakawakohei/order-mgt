@@ -231,9 +231,12 @@ export default {
   },
   data() {
     return {
+      //登録ダイアログ用
       registDialog: false,
+      //順番確認ダイアログ用
       queueDialog: false,
 
+      //表示している情報がいつ取得されたかを表示させる
       nowDate: null,
 
       plans: [],
@@ -253,6 +256,7 @@ export default {
       this.getParticipant();
     },
     getPlans() {
+      //DBにある企画(plans)を全取得
       this.plans = [];
       this.axios.get(`${this.url}/plans`).then((response) => {
         this.plans = response.data;

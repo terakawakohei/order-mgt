@@ -284,13 +284,18 @@ export default {
       //親コンポーネント（Home.vue）にダイアログを閉じるような処理をお願いする
       this.$emit("clickClose");
     },
+
     getPlans() {
+      //DBにある企画(plans)を全取得
       this.plans = [];
       this.axios.get(`${this.url}/plans`).then((response) => {
         this.plans = response.data;
       });
     },
+
     getParticipated() {
+      //selected_planに応じて、その企画の参加者のうちすでに参加を終えて終了済みとなっている者を取得
+
       //selected_planのidと一致、かつ削除ずみ（すでに参加して試合が終わっている）のticketを全取得
       this.participated = [];
       this.axios.get(`${this.url}/tickets`).then((response) => {
@@ -301,11 +306,11 @@ export default {
         }
         //待ち行列の数は、企画参加者全員から試合終了済みの数を引く
         this.queueNum = response.data.length - this.participated.length;
-        console.log("取得dきてるか？");
-        console.log(this.participated);
       });
     },
+
     isFirstTime(bool) {
+      //初回入力（firstTime）なのかどうかを切り替え、入力欄のデータを消去
       this.firstTime = bool;
       this.selected_ticket = null;
       this.name = "";
@@ -363,7 +368,7 @@ export default {
           comment: this.comment,
           deleted_at: null,
         };
-        console.log(ticket);
+
         this.axios.post(`${this.url}/tickets`, ticket).then(() => {
           //post処理が終わったら画面を進める
           this.e1 = 4;

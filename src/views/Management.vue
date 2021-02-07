@@ -183,10 +183,12 @@ export default {
   },
   data() {
     return {
+      //企画作成ダイアログ用
       createDialog: false,
-      deleteDialog: false,
       planName: "",
       matchStyle: "",
+      //企画削除ダイアログ用
+      deleteDialog: false,
       selectedDeletePlan: null,
       options: {
         animation: 200,
@@ -203,21 +205,27 @@ export default {
     this.getPlans();
   },
   watch: {
+    //企画が選択されたことを監視、変更があったらその企画に応じた参加者を取得する
     selected_plan: function() {
       this.getParticipant();
     },
+    //新たに追加された企画をplansに追加する（更新する）
     createDialog: function() {
       this.getPlans();
     },
   },
   methods: {
     getPlans() {
+      //DBにある企画(plans)を全取得
       this.plans = [];
       this.axios.get(`${this.url}/plans`).then((response) => {
         this.plans = response.data;
       });
     },
+
     getParticipant() {
+      //selected_planに応じて、その企画の参加者をparticipansに入れる
+
       //selected_planのidと一致、かつ順番待ち状態（deleted_atがnull）のticketを全取得
       this.participants = [];
       this.axios.get(`${this.url}/tickets`).then((response) => {
@@ -226,6 +234,7 @@ export default {
             this.participants.push(t);
           }
         }
+        //orderでソートする
         function compare(a, b) {
           let comparison = 0;
           if (a.order > b.order) {
@@ -235,12 +244,13 @@ export default {
           }
           return comparison;
         }
-
         this.participants.sort(compare);
       });
     },
-    //participantsの中での並び順でDBに更新をかける
+
     changeOrder() {
+      //participantsのインデックス0〜末尾までの順番で、orderを更新する
+      //participants全てにputを行うまで処理を待つように、Promiseを用いる
       return new Promise((resolve) => {
         for (let i = 0; i < this.participants.length; i++) {
           this.axios
@@ -249,36 +259,30 @@ export default {
             })
             .then(() => {
               if (i == this.participants.length - 1) {
+                //全てのparticipantsに更新をかけたら、完了とみなす
                 resolve();
               }
             });
         }
       });
     },
+
     async update() {
+      //参加者の情報をアップデートする
       await this.changeOrder();
       this.getParticipant();
     },
-    switchCompleted(id) {
-      console.log(id);
-      console.log(new Date().toISOString());
-      this.axios
-        .put(`${this.url}/tickets/${id}`, {
-          deleted_at: new Date().toISOString(),
-        })
-        .then(() => {
-          this.getParticipant();
-          console.log(this.participants);
-        });
-    },
+
     finishGame(id) {
+      //試合が終わったことにする
       this.axios.delete(`${this.url}/tickets/${id}`).then(() => {
         this.getParticipant();
         this.update();
-        console.log(this.participants);
       });
     },
+
     createPlan() {
+      //企画を作成する
       this.axios
         .post(`${this.url}/plans`, {
           name: this.planName,
@@ -290,8 +294,9 @@ export default {
           this.createDialog = false;
         });
     },
+
     deletePlan() {
-      console.log(this.selectedDeletePlan.id);
+      //企画を削除する
       this.axios
         .delete(`${this.url}/plans/${this.selectedDeletePlan.id}`)
         .then(() => {
