@@ -47,8 +47,15 @@
             {{ p.name }}
             <v-row>
               <v-col class="text-right pt-0">
+                <v-chip
+                  class="ma-2"
+                  color="grey lighten-4"
+                  text-color="grey darken-3"
+                >
+                  {{ p.number_of_times }}回めの参加
+                </v-chip>
                 <v-chip class="ma-2" color="grey" text-color="white">
-                  {{ p.order }}ばんめ
+                  {{ p.order }}番目
                 </v-chip>
               </v-col>
             </v-row>
@@ -56,7 +63,7 @@
           <v-card-text class="feed-body">
             <v-row>
               <v-col class="text-left">
-                <v-text class="">{{ p.comment }}</v-text>
+                <v-text class="">コメント:{{ p.comment }}</v-text>
               </v-col>
               <v-col class="text-right">
                 <v-btn
