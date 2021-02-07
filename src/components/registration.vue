@@ -150,13 +150,17 @@
 
         <v-row justify="center">
           <v-btn
+            rounded
+            large
+            color="indigo lighten-3"
             :disabled="!selected_ticket && !name"
-            outlined
-            text
-            class="mr-3 py-7"
             @click="e1 = 3"
+            class="white--text"
           >
-            次へ
+            次へすすむ
+            <v-icon class="ml-2" dark>
+              mdi-arrow-right-bold
+            </v-icon>
           </v-btn>
         </v-row>
         <v-row justify="end">
@@ -167,13 +171,20 @@
       </v-stepper-content>
       <v-stepper-content step="3">
         <v-row v-if="!selected_ticket" class="text-center">
-          <v-col> {{ name }}({{ switchName }})で予約をします。 </v-col>
+          <v-col>
+            youtubeアカウント名:{{ name }}、switchアカウント名:{{
+              switchName
+            }}で予約をします。
+          </v-col>
         </v-row>
         <v-row v-else class="text-center">
           <v-col>
-            {{ selected_ticket.name }}({{
-              selected_ticket.switch_name
-            }})で予約をします。
+            youtubeアカウント名:
+            <strong>
+              {{ selected_ticket.name }}
+            </strong>
+            、switchアカウント名:
+            <strong> {{ selected_ticket.switch_name }} </strong>で予約をします。
           </v-col>
         </v-row>
         <v-row class="text-center">
@@ -183,25 +194,34 @@
         </v-row>
         <v-row class="text-center">
           <v-col>
-            <v-textarea
-              v-model="comment"
-              solo
-              name="input-7-4"
-              label="Solo textarea"
-            ></v-textarea>
+            <v-textarea v-model="comment" solo></v-textarea>
           </v-col>
         </v-row>
 
-        <v-row justify="end">
-          <v-btn outlined text class="mr-3 py-7" @click="book()">
+        <v-row justify="center">
+          <v-btn
+            rounded
+            large
+            color="indigo lighten-3"
+            @click="book()"
+            class="white--text"
+          >
             予約する
+            <v-icon class="ml-2" dark>
+              mdi-arrow-right-bold
+            </v-icon>
+          </v-btn>
+        </v-row>
+        <v-row justify="end">
+          <v-btn outlined text class="mr-3 py-7" @click="e1 = 2">
+            戻る
           </v-btn>
         </v-row>
       </v-stepper-content>
       <v-stepper-content step="4">
         <v-row class="text-center">
           <v-col class="">
-            <strong>予約完了</strong>
+            <strong>予約完了！</strong>
           </v-col>
         </v-row>
         <v-row class="text-center">
@@ -219,8 +239,14 @@
           </v-col>
         </v-row>
 
-        <v-row justify="end">
-          <v-btn outlined text class="mr-3" @click="finishBook()">
+        <v-row justify="center" class="my-7">
+          <v-btn
+            rounded
+            large
+            color="indigo lighten-3"
+            @click="finishBook()"
+            class="white--text"
+          >
             閉じる
           </v-btn>
         </v-row>

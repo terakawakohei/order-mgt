@@ -39,34 +39,136 @@
       :options="options"
       v-model="participants"
       element="v-row"
-      class="justify-center"
+      class="justify-center "
     >
       <v-col v-for="(p, index) in participants" v-bind:key="index">
         <v-card style="overflow:scroll;">
           <v-card-title>
             {{ p.name }}
+            <v-row>
+              <v-col class="text-right pt-0">
+                <v-chip class="ma-2" color="grey" text-color="white">
+                  {{ p.order }}ばんめ
+                </v-chip>
+              </v-col>
+            </v-row>
           </v-card-title>
           <v-card-text class="feed-body">
-            <ul class="feed-items">
-              <li class="feed-list">{{ p.order }}ばんめ</li>
-            </ul>
+            <v-row>
+              <v-col class="text-left">
+                <v-text class="">{{ p.comment }}</v-text>
+              </v-col>
+              <v-col class="text-right">
+                <v-btn
+                  v-if="index == 0"
+                  @click="finishGame(p.id)"
+                  color="red"
+                  dark
+                  rounded
+                >
+                  終了済みにする
+                </v-btn>
+              </v-col>
+            </v-row>
           </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn
-              v-if="index == 0"
-              @click="finishGame(p.id)"
-              color="red"
-              outlined
-              rounded
-              text
-            >
-              終了済みにする
-            </v-btn>
-          </v-card-actions>
         </v-card>
       </v-col>
     </draggable>
+    <v-row justify="center" class="mt-12">
+      <v-dialog v-model="createDialog" persistent max-width="600px">
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn color="primary" dark v-bind="attrs" v-on="on">
+            企画を追加する
+          </v-btn>
+        </template>
+        <v-card>
+          <v-card-title>
+            <span class="headline">新規作成</span>
+          </v-card-title>
+          <v-card-text>
+            <v-container>
+              <v-row>
+                <v-col cols="12">
+                  <v-text-field
+                    label="企画名"
+                    v-model="planName"
+                    required
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-select
+                    :items="['1on1', '2on2']"
+                    label="対戦人数"
+                    v-model="matchStyle"
+                    required
+                  ></v-select>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="blue darken-1" text @click="createDialog = false">
+              閉じる
+            </v-btn>
+            <v-btn
+              outlined
+              :disabled="!planName || !matchStyle"
+              color="blue darken-1"
+              text
+              @click="createPlan"
+            >
+              作成
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-row>
+    <v-row justify="center" class="my-7">
+      <v-dialog v-model="deleteDialog" persistent max-width="600px">
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn color="red" dark v-bind="attrs" v-on="on">
+            企画を削除する
+          </v-btn>
+        </template>
+        <v-card>
+          <v-card-title>
+            <span class="headline">削除</span>
+          </v-card-title>
+          <v-card-text>
+            <v-container>
+              <v-row>
+                <v-col cols="12">
+                  <v-select
+                    :items="plans"
+                    label="企画名"
+                    item-text="name"
+                    return-object
+                    v-model="selectedDeletePlan"
+                    required
+                  ></v-select>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="blue darken-1" text @click="deleteDialog = false">
+              閉じる
+            </v-btn>
+            <v-btn
+              :disabled="!selectedDeletePlan"
+              outlined
+              color="blue darken-1"
+              text
+              @click="deletePlan()"
+            >
+              削除
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-row>
   </v-container>
 </template>
 
@@ -81,8 +183,11 @@ export default {
   },
   data() {
     return {
-      dialog: false,
-      agreementDialog: false,
+      createDialog: false,
+      deleteDialog: false,
+      planName: "",
+      matchStyle: "",
+      selectedDeletePlan: null,
       options: {
         animation: 200,
       },
@@ -100,6 +205,9 @@ export default {
   watch: {
     selected_plan: function() {
       this.getParticipant();
+    },
+    createDialog: function() {
+      this.getPlans();
     },
   },
   methods: {
@@ -166,8 +274,31 @@ export default {
     finishGame(id) {
       this.axios.delete(`${this.url}/tickets/${id}`).then(() => {
         this.getParticipant();
+        this.update();
         console.log(this.participants);
       });
+    },
+    createPlan() {
+      this.axios
+        .post(`${this.url}/plans`, {
+          name: this.planName,
+          match_type: this.matchStyle,
+        })
+        .then(() => {
+          this.planName = "";
+          this.matchStyle = "";
+          this.createDialog = false;
+        });
+    },
+    deletePlan() {
+      console.log(this.selectedDeletePlan.id);
+      this.axios
+        .delete(`${this.url}/plans/${this.selectedDeletePlan.id}`)
+        .then(() => {
+          this.selectedDeletePlan = null;
+          this.deleteDialog = false;
+          this.getPlans();
+        });
     },
   },
 };
